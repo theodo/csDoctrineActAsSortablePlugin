@@ -59,40 +59,40 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
     $this->hasColumn($name, $this->_options['type'], $this->_options['length'], $this->_options['options']);
 
-    if (!empty($this->_options['uniqueBy']) && !is_array($this->_options['uniqueBy'])) 
+    if (!empty($this->_options['uniqueBy']) && !is_array($this->_options['uniqueBy']))
     {
       throw new sfException("Sortable option 'uniqueBy' must be an array");
     }
-    
+
     if ($this->_options['uniqueIndex'] == true && ! empty($this->_options['uniqueBy']))
     {
       $indexFields = array($this->_options['name']);
       $indexFields = array_merge($indexFields, $this->_options['uniqueBy']);
 
-      $this->index($this->getSortableIndexName(), array('fields' => $indexFields, 'type' => 'unique')); 
+      $this->index($this->getSortableIndexName(), array('fields' => $indexFields, 'type' => 'unique'));
 
     }
     elseif ($this->_options['unique'])
     {
       $indexFields = array($this->_options['name']);
-      $this->index($this->getSortableIndexName(), array('fields' => $indexFields, 'type' => 'unique')); 
+      $this->index($this->getSortableIndexName(), array('fields' => $indexFields, 'type' => 'unique'));
 
     }
 
     $this->addListener(new Doctrine_Template_Listener_Sortable($this->_options));
   }
-  
-  /** 
-  * Returns the name of the index to create for the position field. 
-  * 
-  * @return string 
-  */ 
-  protected function getSortableIndexName() 
-  { 
-    return sprintf('%s_%s_%s', $this->getTable()->getTableName(), $this->_options['name'], $this->_options['indexName']); 
-  } 
-  
-  
+
+  /**
+  * Returns the name of the index to create for the position field.
+  *
+  * @return string
+  */
+  protected function getSortableIndexName()
+  {
+    return sprintf('%s_%s_%s', $this->getTable()->getTableName(), $this->_options['name'], $this->_options['indexName']);
+  }
+
+
   /**
    * Demotes a sortable object to a lower position
    *
@@ -186,7 +186,14 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
       foreach ($this->_options['uniqueBy'] as $field)
       {
-        $q->addWhere($field . ' = ?', $object[$field]);
+        if (is_null($object[$field]))
+        {
+          $q->addWhere($field . ' IS NULL');
+        }
+        else
+        {
+          $q->addWhere($field . ' = ?', $object[$field]);
+        }
       }
 
       $q->execute();
@@ -203,7 +210,14 @@ class Doctrine_Template_Sortable extends Doctrine_Template
 
       foreach($this->_options['uniqueBy'] as $field)
       {
-        $q->addWhere($field . ' = ?', $object[$field]);
+        if (is_null($object[$field]))
+        {
+          $q->addWhere($field . ' IS NULL');
+        }
+        else
+        {
+          $q->addWhere($field . ' = ?', $object[$field]);
+        }
       }
 
       $q->execute();
@@ -228,7 +242,7 @@ class Doctrine_Template_Sortable extends Doctrine_Template
   public function sortTableProxy($order)
   {
     /*
-      TODO 
+      TODO
         - Add proper error messages.
     */
     $table = $this->getInvoker()->getTable();
